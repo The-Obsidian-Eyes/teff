@@ -29,8 +29,20 @@ const PORT = process.env.PORT || 5000;
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
-    methods: ["GET", "POST", "DELETE", "PUT"],
+    origin: function(origin, callback) {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) {
+        return callback(null, true);
+      }
+
+      // Allow all localhost origins
+      if (origin.match(/^http:\/\/localhost:(5173|5174|5175|5176)$/)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    methods: ["GET", "POST", "DELETE", "PUT", "OPTIONS"],
     allowedHeaders: [
       "Content-Type",
       "Authorization",
@@ -39,6 +51,7 @@ app.use(
       "Pragma",
     ],
     credentials: true,
+    optionsSuccessStatus: 200
   })
 );
 
